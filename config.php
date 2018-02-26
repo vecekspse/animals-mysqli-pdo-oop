@@ -38,12 +38,16 @@ class DB extends PDO {
         }
     }
     public function run($sql, $args = NULL) {
-        if(!$args) {
-            return $this->query($sql);  
+        try { 
+            if(!$args) {
+                return $this->query($sql);  
+            }
+            $stmt = $this->prepare($sql);
+            $stmt->execute($args);
+            return $stmt;            
+        } catch (PDOException $e) {
+            die($e->getMessage());
         }
-        $stmt = $this->prepare($sql);
-        $stmt->execute($args);
-        return $stmt;
     }
 }
 class AnimalManager extends DB {
@@ -52,6 +56,12 @@ class AnimalManager extends DB {
     }
     public function showAnimals() {
         return $this->run('SELECT * FROM zvire;')->fetchAll(PDO::FETCH_ASSOC);
+    }
+    public function showKinds() {
+        return $this->run('SELECT id, druh FROM druh;')->fetchAll(PDO::FETCH_ASSOC);
+    }
+    public function showStates() {
+        return $this->run('SELECT id, zeme FROM zeme_puvodu')->fetchAll(PDO::FETCH_ASSOC);
     }
     public function insertAnimal($args) {
         $sql = 'INSERT INTO zvire VALUES (NULL, :nazev_zvirete, :latinsky_nazev, 
@@ -66,4 +76,4 @@ class AnimalManager extends DB {
 }
 
 $aManager = new AnimalManager();
-var_dump($aManager->showAnimals());
+//var_dump($aManager->showAnimals());
